@@ -1,4 +1,5 @@
 import { CarrinhoProvider } from "common/contexts/Carrinho";
+import { PagamentoProvider } from "common/contexts/Pagamento";
 import { UsuarioProvider } from "common/contexts/Usuario";
 import Carrinho from "pages/Carrinho";
 import Feira from "pages/Feira";
@@ -13,14 +14,19 @@ function Router() {
           <Route exact path="/">
             <Login />
           </Route>
+
           <CarrinhoProvider>
             <Route path="/feira">
               <Feira />
             </Route>
-            <Route path="/carrinho">
-              <Carrinho />
-            </Route>
+
+            <PagamentoProvider>
+              <Route path="/carrinho">
+                <Carrinho />
+              </Route>
+            </PagamentoProvider>
           </CarrinhoProvider>
+
         </UsuarioProvider>
       </Switch>
     </BrowserRouter>
