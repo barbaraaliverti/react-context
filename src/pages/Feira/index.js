@@ -12,7 +12,7 @@ import { UsuarioContext } from 'common/contexts/Usuario';
 
 function Feira() {
 
-  const { nome, saldo } = useContext (UsuarioContext);
+  const { nome, saldo } = useContext(UsuarioContext);
 
   return (
     <Container>

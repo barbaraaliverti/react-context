@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 export const CarrinhoContext = createContext();
 CarrinhoContext.displayName = 'Carrinho';
@@ -8,10 +8,11 @@ CarrinhoContext.displayName = 'Carrinho';
 
 export const CarrinhoProvider = ({ children }) => {
 
-  const [ carrinho, setCarrinho ] = useState([]);  
+  const [ carrinho, setCarrinho ] = useState([]);
+  const [ quantidadeProdutos , setQuantidadeProdutos ] = useState(0);
 
   return (
-    <CarrinhoContext.Provider value={{ carrinho, setCarrinho }}>
+    <CarrinhoContext.Provider value={{ carrinho, setCarrinho , quantidadeProdutos ,  setQuantidadeProdutos}}>
       { children }
     </CarrinhoContext.Provider>
   )
@@ -20,6 +21,13 @@ export const CarrinhoProvider = ({ children }) => {
 // isso é um custom hook para externalizar a responsabilidade de mudar o contexto
 export const useCarrinhoContext = () => {
   const { carrinho, setCarrinho} = useContext(CarrinhoContext);
+  const { quantidadeProdutos , setQuantidadeProdutos } = useContext(CarrinhoContext);
+
+  useEffect(() => {
+    const novaQuantidade = carrinho.reduce( (contador , produto) => contador + produto.quantidade, 0);
+    setQuantidadeProdutos(novaQuantidade);
+    
+  }, [carrinho, setQuantidadeProdutos]);
 
   function mudarQuantidade(id, quantidade) {
     return carrinho.map(itemDoCarrinho => {
@@ -54,6 +62,8 @@ export const useCarrinhoContext = () => {
     carrinho,
     setCarrinho,
     adicionarProduto,
-    removerProduto
+    removerProduto,
+    quantidadeProdutos,
+    setQuantidadeProdutos
   }
 }
