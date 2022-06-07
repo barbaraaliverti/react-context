@@ -1,11 +1,32 @@
-import { createContext, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 export const CarrinhoContext = createContext();
 CarrinhoContext.displayName = 'Carrinho';
 
+
+// extraímos a função adicionarProduto pra deixar o componente CarrinhoProvider com a única função de ser o provider
+
 export const CarrinhoProvider = ({ children }) => {
 
-  const [ carrinho, setCarrinho ] = useState([]);
+  const [ carrinho, setCarrinho ] = useState([]);  
+
+  return (
+    <CarrinhoContext.Provider value={{ carrinho, setCarrinho }}>
+      { children }
+    </CarrinhoContext.Provider>
+  )
+}
+
+// isso é um custom hook para externalizar a responsabilidade de mudar o contexto
+export const useCarrinhoContext = () => {
+  const { carrinho, setCarrinho} = useContext(CarrinhoContext);
+
+  function mudarQuantidade(id, quantidade) {
+    return carrinho.map(itemDoCarrinho => {
+      if(itemDoCarrinho.id === id) itemDoCarrinho.quantidade += quantidade;
+      return itemDoCarrinho;
+    })
+  }
 
   function adicionarProduto(novoProduto) {
     const temOProduto = carrinho.some(itemDoCarrinho => itemDoCarrinho.id === novoProduto.id);
@@ -15,15 +36,24 @@ export const CarrinhoProvider = ({ children }) => {
         [...carrinhoAnterior, novoProduto]
       )
     }
-    setCarrinho(carrinhoAnterior => carrinhoAnterior.map(itemDoCarrinho => {
-      if(itemDoCarrinho.id === novoProduto.id) itemDoCarrinho.quantidade += 1;
-      return itemDoCarrinho;
-    }))
+    setCarrinho(mudarQuantidade(novoProduto.id, 1))
   }
 
-  return (
-    <CarrinhoContext.Provider value={{ carrinho, setCarrinho, adicionarProduto }}>
-      { children }
-    </CarrinhoContext.Provider>
-  )
+  function removerProduto(id) {
+    const produto = carrinho.find(itemDoCarrinho => itemDoCarrinho.id === id);
+    const ultimoProduto = produto.quantidade === 1;
+
+    if(ultimoProduto) {
+      return setCarrinho(carrinhoAnterior => carrinhoAnterior.filter(itemDoCarrinho => itemDoCarrinho.id !== id));
+    }
+
+    setCarrinho(mudarQuantidade(id, -1))
+  }
+
+  return {
+    carrinho,
+    setCarrinho,
+    adicionarProduto,
+    removerProduto
+  }
 }
